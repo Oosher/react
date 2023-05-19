@@ -138,6 +138,22 @@ const users = [
     user_id: "4235234234mfnjasdasdry23",
   },
 ];
+
+const attempts = [
+{
+  email: "admin@admin.com",
+  attempt:0,
+  lockDate:null,
+},
+{
+  email: "admin1@admin.com",
+  attempt:0,
+  lockDate:null,
+  
+},
+
+
+]
 const verifyToken = (tokenFromClient) => {
   try {
     const userDataFromPayload = jwt.verify(tokenFromClient, key);
@@ -247,7 +263,16 @@ app.delete("/cards/:id", (req, res) => {
 });
 
 app.post("/users/login", (req, res) => {
+
   console.log(req.body);
+
+  const date = new Date();
+
+
+
+
+  
+
   //const tokenFromClient = req.header("x-auth-token");
   // if (tokenFromClient) {
   //   const userData = verifyToken(tokenFromClient);
@@ -261,12 +286,37 @@ app.post("/users/login", (req, res) => {
   // User is not logged in, so check if the email and password are valid
   const { email, password } = req.body;
   const user = users.find((u) => u.email === email && u.password === password);
+  const index = attempts.findIndex((attempt)=>attempt.email===email); 
+
+    if (attempts[index]?.lockDate) {
+
+
+      if (attempts[index].lockDate.getTime()+50000<date.getTime()) {
+
+        attempts[index].attempt=0 ;
+        attempts[index].lockDate=null;
+
+      }
+
+      
+    }
 
   if (!user) {
+    index!==-1?attempts[index].attempt++:null;
+
+    if (attempts[index]?.attempt>=3) {
+
+      attempts[index].attempt===3?attempts[index].lockDate = date:null;
+      console.log(attempts);
+      res.status(401).json({ message: "Your account is locked for 24 hours for too many failed attempts" });
+      return;
+
+    }
     // User not found or password incorrect
     res.status(401).json({ message: "Invalid email or password" });
     return;
   }
+
 
   // User found, so generate a new token and send it back
   const userDataForToken = {
@@ -277,8 +327,17 @@ app.post("/users/login", (req, res) => {
     id: user.user_id,
     ...user,
   };
-  const token = jwt.sign(userDataForToken, key);
-  res.send(token);
+  
+  if (!attempts[index].lockDate) {
+    attempts[index].attempt = 0;
+    const token = jwt.sign(userDataForToken, key);
+    res.send(token);
+
+    return;
+  }
+
+  res.status(401).json({ message: "Your account is locked for 24 hours for too many failed attempts" });
+
 });
 
 app.post("/users", (req, res) => {
@@ -287,7 +346,9 @@ app.post("/users", (req, res) => {
     const newUser = req.body;
     newUser.user_id = uuidv4(); // generate a new UUID and add it to the newUser object
     users.push(newUser);
+    attempts.push({email:newUser.email,attempt:0,lockDate:null})
     console.log(users);
+    console.log(attempts);
     res.status(201).send({ message: "User added successfully." });
   }else{
 
