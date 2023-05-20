@@ -67,8 +67,8 @@ const useUsers = () => {
     async (updatedUserFromClient) => {
       try {
         const normalizedUser = normalizeUser(updatedUserFromClient);
-        await updateUser({...normalizedUser,user_id:user.user_id,isAdmin:false});
-        setUser({...normalizedUser,user_id:user.user_id,isAdmin:false})
+        await updateUser({...normalizedUser,user_id:user.user_id,isAdmin:user.isAdmin});
+        setUser({...normalizedUser,user_id:user.user_id,isAdmin:user.isAdmin})
       } catch (error) {
         requestStatus(false, error, null);
       }

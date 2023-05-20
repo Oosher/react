@@ -156,7 +156,7 @@ const UserForm = ({
             setData({ ...data, isBusiness: !!e.target.checked });
           }}
           name="isBusiness"
-          control={<Checkbox value={user?.isBusiness} defaultChecked  color="primary" />}
+          control={<Checkbox value={user?.isBusiness}   color="primary" />}
           label="Signup as business"
         />
       </Grid>
