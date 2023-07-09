@@ -1,6 +1,6 @@
 import axios from "axios";
-import "dotenv";
-const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8181";
+/* import "dotenv"; */
+/* const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8181"; */
 
 export const login = async (user) => {
   try {
